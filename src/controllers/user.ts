@@ -7,8 +7,6 @@ import { IdGenerator } from '../services/IdGenerator'
 import { HashManager } from '../services/HashManager'
 
 export const signupUser = async (req: Request, res: Response) => {
-
-
     try {
         if (!req.body.email || req.body.email.indexOf("@") === -1) {
             throw new Error("Invalid email");
@@ -29,22 +27,20 @@ export const signupUser = async (req: Request, res: Response) => {
             userData.password
         )
 
-
         const userDataBase = new UserDataBase()
         await userDataBase.createUser(
             id,
             userData.name,
             userData.email,
             hashPassword
-        )
+        );
 
         const authenticator = new JwtAuthenticator()
         const token = authenticator.generateToken({
-           
-            id:id
+            id: id
         })
         res.status(200).send({
-            token: token
+            token
         })
 
     } catch (err) {
@@ -54,9 +50,7 @@ export const signupUser = async (req: Request, res: Response) => {
     }
 }
 
-
 export const userLogin =  async (req: Request, res: Response) => {
-
     try {
 
         if (!req.body.email || req.body.email.indexOf("@") === -1) {
@@ -77,61 +71,60 @@ export const userLogin =  async (req: Request, res: Response) => {
         }
         const authenticator = new JwtAuthenticator()
         const token = authenticator.generateToken({
-          
             id:user.id
         })
         res.status(200).send({
-            message:"Usuário logado!"
-        })
+            token
+        });
 
     } catch (err) {
         res.status(400).send({
             message: err.message
-        })
+        });
     }
 }
- 
 
 export const getUserById =  async (req: Request, res: Response) => {
-        
-    
     try{
-        const token = req.headers.authorization as string
+        const token = req.headers.authorization as string;
 
         const authenticator = new JwtAuthenticator()
         const authenticationData = authenticator.getData(token)
 
         const userDB = new UserDataBase()
-
-
         const user = await userDB.getUserById(authenticationData.id)
+
         res.status(200).send({
-            id:user.id, name:user.name, email:user.email
+            id:user.id, 
+            name:user.name, 
+            email:user.email
         })
     }  catch(err) {
         res.status(400).send({
             message: err.message
         })
-
     }    
 }
+
 export const getUserInfo =  async (req: Request, res: Response) => {
-        
-    
     try{
         const token = req.headers.authorization as string
 
         const authenticator = new JwtAuthenticator()
-        const authenticationData = authenticator.getData(token)
+        const authenticationData = authenticator.getData(token);
 
-        res.status(200).send({
-            
-        })
+         const userDB = new UserDataBase()
+         const user = await userDB.getUserById(authenticationData.id)
+ 
+         res.status(200).send({
+             id:user.id, 
+             name:user.name, 
+             email:user.email
+         })
     }  catch(err) {
         res.status(400).send({
             message: err.message
         })
-
     }    
 }
 

@@ -6,58 +6,47 @@ import moment from 'moment'
 
 import { RecipeDataBase } from './data/RecipesDataBase'
 
-import { signupUser, userLogin, getUserById, getUserInfo } from './methods/user'
+import { signupUser, userLogin, getUserById, getUserInfo } from './controllers/user';
+import { createRecipe } from './controllers/recipes';
 import { IdGenerator } from "./services/IdGenerator";
+import { UserDataBase } from "./data/UserDataBase";
 
 dotenv.config();
 
-
 const app = express();
-
 app.use(express.json());
 
+app.post ("/signup", signupUser);
 
-app.post ("/signup", signupUser)
+app.post("/login", userLogin);
 
-app.post("/login", userLogin)
+app.get("/user/profile", getUserInfo);
 
-app.get("/user/:id", getUserById)
+app.get("/user/:id", getUserById);
 
-app.get("/user/profile", getUserInfo)
+app.post("/recipes", createRecipe );
 
-app.post("/recipes", async (req: Request, res: Response) => {
-    
+app.get("/recipes/:id", async (req, res) => {
     try {
-    const token = req.headers.authorization as string
+    const token = req.headers.authorization as string;
 
-    const recipeData = {
-        title: req.body.title,
-        description: req.body.description
-    }
-    const todayDate =  Date.now()
+    const authorization = new JwtAuthenticator();
+    authorization.getData(token);
 
-    const authenticator = new JwtAuthenticator()
-    const authenticationData = authenticator.getData(token)
+    const recipeDB = new RecipeDataBase();
+    const recipe = await recipeDB.getRecipeById(req.params.id);
     
-
-    const idGenerator = new IdGenerator(); 
-    const id = idGenerator.idGenerator(); 
-
-    const recipeDataBase = new RecipeDataBase()
-    const recipeCreated =  await recipeDataBase.createRecipe(id, recipeData.title, recipeData.description, new Date(todayDate))
-   
     res.status(200).send({
-        message:"Receita criada com sucesso"
+        id: recipe.id, 
+        name: recipe.title, 
+        email: recipe.description
     })
-
-}catch(err) {
-    res.status(400).send({
-        message:err.message
-    })
-}
-  
+    }catch(err) {
+        res.status(400).send({
+            message: err.message
+        });
+    }
 })
-
 
 
 
