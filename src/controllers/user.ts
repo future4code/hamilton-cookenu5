@@ -3,6 +3,7 @@ import { UserDataBase } from '../data/UserDataBase'
 import { JwtAuthenticator } from '../services/JwtAuthenticator'
 import { IdGenerator } from '../services/IdGenerator'
 import { HashManager } from '../services/HashManager'
+import { BaseDataBase } from "../data/BaseDataBase";
 
 export const signupUser = async (req: Request, res: Response) => {
     try {
@@ -49,6 +50,7 @@ export const signupUser = async (req: Request, res: Response) => {
             message: err.message
         })
     }
+    await BaseDataBase.destroyConnection();
 }
 
 export const userLogin =  async (req: Request, res: Response) => {
@@ -82,6 +84,7 @@ export const userLogin =  async (req: Request, res: Response) => {
             message: err.message
         });
     }
+    await BaseDataBase.destroyConnection();
 }
 
 export const getUserById =  async (req: Request, res: Response) => {
@@ -104,6 +107,7 @@ export const getUserById =  async (req: Request, res: Response) => {
             message: err.message
         })
     }    
+    await BaseDataBase.destroyConnection();
 }
 
 export const getUserInfo =  async (req: Request, res: Response) => {
@@ -126,5 +130,21 @@ export const getUserInfo =  async (req: Request, res: Response) => {
             message: err.message
         })
     }    
+    await BaseDataBase.destroyConnection();
 }
 
+export const feedUser = async(req:Request, res:Response) => {
+    try {
+      const token = req.headers.authorization as string;
+
+      const authenticator = new JwtAuthenticator();
+      const payloadAuthor = authenticator.getData(token);
+
+      const receipeFeed = await new UserDataBase().getRecipeFeed(payloadAuthor.id);
+
+      res.status(200).send({recipes:[receipeFeed]})
+    } catch(err) {
+      res.status(400).send({message: err.message || err.mysqlmessage })
+    }
+    await BaseDataBase.destroyConnection();
+  }

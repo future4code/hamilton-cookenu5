@@ -11,7 +11,7 @@ export class FollowersDataBase extends BaseDataBase{
     }).into(FollowersDataBase.TABLE_NAME)
   }
 
-  public async unfollowUserById(unfollowed_id: string,unfollower_id: string): Promise<void> {
+  public async unfollowUserById(unfollowed_id: string, unfollower_id: string): Promise<void> {
     await this.getConnection()
     .delete().from(FollowersDataBase.TABLE_NAME)
     .where({followed_id: unfollowed_id})

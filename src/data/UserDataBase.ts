@@ -30,4 +30,18 @@ export class UserDataBase extends BaseDataBase{
         })
         return result[0]
     }
+
+    public async getRecipeFeed(user_id:string):Promise<any> {
+        const recipeFeed = await this.getConnection().raw ( 
+          `
+           SELECT cr.id AS "ID_RECIPE", cr.title, cr.description, cr.createAt, cr.user_id, r.name AS "author"
+           FROM cookenu_recipe AS cr
+           JOIN ${UserDataBase.TABLE_NAME} AS r
+           ON cr.user_id = r.id
+           WHERE "${user_id}" = user_id
+           ORDER BY cr.createAt DESC
+          `
+        )
+        return recipeFeed[0][0]
+      }
 }
