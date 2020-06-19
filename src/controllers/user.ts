@@ -1,6 +1,4 @@
 import express, { Request, Response } from "express";
-import dotenv from "dotenv";
-import { AddressInfo } from "net";
 import { UserDataBase } from '../data/UserDataBase'
 import { JwtAuthenticator } from '../services/JwtAuthenticator'
 import { IdGenerator } from '../services/IdGenerator'
@@ -11,14 +9,17 @@ export const signupUser = async (req: Request, res: Response) => {
         if (!req.body.email || req.body.email.indexOf("@") === -1) {
             throw new Error("Invalid email");
         }
+
         if (!req.body.password || req.body.password.length < 6) {
             throw new Error("Invalid password")
         }
+
         const userData = {
             name: req.body.name,
             email: req.body.email,
             password: req.body.password
         }
+        
         const idGenerator = new IdGenerator
         const id = idGenerator.idGenerator()
 
@@ -39,10 +40,10 @@ export const signupUser = async (req: Request, res: Response) => {
         const token = authenticator.generateToken({
             id: id
         })
+
         res.status(200).send({
             token
         })
-
     } catch (err) {
         res.status(400).send({
             message: err.message
@@ -52,7 +53,6 @@ export const signupUser = async (req: Request, res: Response) => {
 
 export const userLogin =  async (req: Request, res: Response) => {
     try {
-
         if (!req.body.email || req.body.email.indexOf("@") === -1) {
             throw new Error("Invalid email");
         }

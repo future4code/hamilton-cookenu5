@@ -25,8 +25,8 @@ export const createRecipe = async (req: Request, res: Response) => {
    await recipeDataBase.createRecipe(id, recipeData.title, recipeData.description, new Date(todayDate))
  
   res.status(200).send({
-      message:"Receita criada com sucesso",
-      id
+    message:"Recipe created successfully",
+    id
   })
 
 }catch(err) {

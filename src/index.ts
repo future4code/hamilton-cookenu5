@@ -2,7 +2,6 @@ import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import { AddressInfo } from "net";
 import { JwtAuthenticator } from './services/JwtAuthenticator'
-import moment from 'moment'
 
 import { RecipeDataBase } from './data/RecipesDataBase'
 
@@ -10,6 +9,7 @@ import { signupUser, userLogin, getUserById, getUserInfo } from './controllers/u
 import { createRecipe } from './controllers/recipes';
 import { IdGenerator } from "./services/IdGenerator";
 import { UserDataBase } from "./data/UserDataBase";
+import { FollowersDataBase } from "./data/FollowersDataBase";
 
 dotenv.config();
 
@@ -48,8 +48,59 @@ app.get("/recipes/:id", async (req, res) => {
     }
 })
 
+app.post("/user/follow", async (req, res) => {
+    try {
+        const token = req.headers.authorization as string;
 
+        const authenticator = new JwtAuthenticator()
+        const authenticationData = authenticator.getData(token);
+    
+        const { userToFollowId } = req.body;
 
+        if(!userToFollowId) {
+            throw new Error("User not found");
+        }
+    
+        const followDataBase = new FollowersDataBase();
+        await followDataBase.followUserById(  userToFollowId, authenticationData.id);
+        
+        res.status(200).send({
+            message:"Followed successfully",
+        });
+            
+    }catch(err) {
+        res.status(400).send({
+            message:err.message
+        })
+    }
+})
+
+app.post("/user/unfollow", async (req, res) => {
+    try {
+        const token = req.headers.authorization as string;
+
+        const authenticator = new JwtAuthenticator()
+        const authenticationData = authenticator.getData(token);
+    
+        const { userToUnfollowId } = req.body;
+
+        if(!userToUnfollowId) {
+            throw new Error("User not found");
+        }
+
+        const followDataBase = new FollowersDataBase();
+        await followDataBase.unfollowUserById(userToUnfollowId, authenticationData.id)
+
+        res.status(200).send({
+            message:"Unfollowed successfully",
+        });
+            
+    }catch(err) {
+        res.status(400).send({
+            message:err.message
+        })
+    }
+})
 
 const server = app.listen(process.env.PORT || 3003, () => {
     if (server) {
